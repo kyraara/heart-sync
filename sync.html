@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heart Sync - Touch Together</title>
+    <title>Heart Sync - Sentuh Bersama</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -25,6 +25,10 @@
 
         .romantic-title {
             font-family: 'Playfair Display', serif;
+        }
+
+        .handwritten {
+            font-family: 'Dancing Script', cursive;
         }
 
         /* Touch Screen */
@@ -64,6 +68,20 @@
             transform: translateY(-50%);
         }
 
+        /* Orb name labels */
+        .orb-label {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-shadow: 0 0 10px rgba(255, 0, 110, 0.8);
+            opacity: 0;
+        }
+
         /* Merged Heart */
         .merged-heart {
             position: absolute;
@@ -73,6 +91,37 @@
             opacity: 0;
             pointer-events: none;
             filter: drop-shadow(0 0 40px rgba(255, 0, 110, 0.8));
+        }
+
+        /* Names display after merge */
+        .merged-names {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, calc(-50% + 130px));
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .merged-names .names-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 110, 0.5));
+        }
+
+        .merged-names .ampersand {
+            color: #ff006e;
+            font-size: 1.2rem;
+            margin: 0 8px;
+            -webkit-text-fill-color: #ff006e;
         }
 
         /* Progress Ring */
@@ -101,6 +150,13 @@
             height: 4px;
             background: #ff006e;
             border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Sparkle particles */
+        .sparkle {
+            position: absolute;
             pointer-events: none;
             opacity: 0;
         }
@@ -157,6 +213,20 @@
             background: #ff006e;
             opacity: 0;
         }
+
+        /* Glow burst effect */
+        .glow-burst {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,0,110,0.6), rgba(131,56,236,0.3), transparent);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
@@ -168,10 +238,10 @@
     <div class="fixed top-0 left-0 right-0 z-50 p-4">
         <div class="max-w-md mx-auto">
             <div class="status-badge rounded-2xl p-4 text-center">
-                <p class="text-white text-sm mb-2" id="statusText">Connecting...</p>
+                <p class="text-white text-sm mb-2" id="statusText">Menghubungkan...</p>
                 <div class="flex justify-center gap-4 text-xs">
-                    <span class="text-pink-400" id="user1Status">You: Not Ready</span>
-                    <span class="text-purple-400" id="user2Status">Partner: Not Ready</span>
+                    <span class="text-pink-400" id="user1Status">Kamu: Belum Siap</span>
+                    <span class="text-purple-400" id="user2Status">Pasangan: Belum Siap</span>
                 </div>
             </div>
         </div>
@@ -200,19 +270,26 @@
         </div>
         
         <h2 class="romantic-title text-4xl md:text-5xl text-white mb-4">
-            Touch & Hold
+            Sentuh & Tahan
         </h2>
         <p class="text-pink-300 text-lg mb-2">
-            Press the screen together
+            Tekan layar bersama-sama
         </p>
         <p class="text-gray-500 text-sm">
-            Hold for 3 seconds to sync your hearts
+            Tahan selama 3 detik untuk menyinkronkan hati kalian
         </p>
     </div>
 
-    <!-- Orbs -->
-    <div id="orb1" class="orb orb-user1"></div>
-    <div id="orb2" class="orb orb-user2"></div>
+    <!-- Orbs with name labels -->
+    <div id="orb1" class="orb orb-user1">
+        <span id="orb1Label" class="orb-label"></span>
+    </div>
+    <div id="orb2" class="orb orb-user2">
+        <span id="orb2Label" class="orb-label"></span>
+    </div>
+
+    <!-- Glow Burst -->
+    <div id="glowBurst" class="glow-burst"></div>
 
     <!-- Merged Heart -->
     <div id="mergedHeart" class="merged-heart">
@@ -225,6 +302,13 @@
             </defs>
             <path fill="url(#heartGradient)" d="M50,90 C50,90 10,65 10,40 C10,25 20,15 30,15 C40,15 50,25 50,25 C50,25 60,15 70,15 C80,15 90,25 90,40 C90,65 50,90 50,90 Z"/>
         </svg>
+    </div>
+
+    <!-- Names after merge -->
+    <div id="mergedNames" class="merged-names">
+        <span id="name1Display" class="names-text"></span>
+        <span class="ampersand">&</span>
+        <span id="name2Display" class="names-text"></span>
     </div>
 
     <!-- Success Overlay -->
@@ -241,14 +325,15 @@
                     <path fill="url(#successGradient)" d="M50,90 C50,90 10,65 10,40 C10,25 20,15 30,15 C40,15 50,25 50,25 C50,25 60,15 70,15 C80,15 90,25 90,40 C90,65 50,90 50,90 Z"/>
                 </svg>
             </div>
-            <h1 class="romantic-title text-5xl md:text-6xl text-white mb-6">
-                Connection Established
+            <h1 class="romantic-title text-5xl md:text-6xl text-white mb-4">
+                Koneksi Terjalin
             </h1>
+            <p id="successNames" class="handwritten text-3xl text-pink-300 mb-6"></p>
             <p class="text-pink-300 text-2xl mb-12">
-                Forever 💕
+                Selamanya 💕
             </p>
             <button id="openMessageBtn" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
-                Open Our Message
+                Buka Pesan Kami 💌
             </button>
         </div>
     </div>
@@ -261,25 +346,26 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getDatabase, ref, set, onValue, update } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCBJI5DwaPfLlLBCWHyUWjpEYJTd2EGvJg",
-  authDomain: "heart-sync-valentine.firebaseapp.com",
-  databaseURL: "https://heart-sync-valentine-default-rtdb.firebaseio.com",
-  projectId: "heart-sync-valentine",
-  storageBucket: "heart-sync-valentine.firebasestorage.app",
-  messagingSenderId: "648055518881",
-  appId: "1:648055518881:web:4d6c99ad54f20ca518e2e0"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBJI5DwaPfLlLBCWHyUWjpEYJTd2EGvJg",
+            authDomain: "heart-sync-valentine.firebaseapp.com",
+            databaseURL: "https://heart-sync-valentine-default-rtdb.firebaseio.com",
+            projectId: "heart-sync-valentine",
+            storageBucket: "heart-sync-valentine.firebasestorage.app",
+            messagingSenderId: "648055518881",
+            appId: "1:648055518881:web:4d6c99ad54f20ca518e2e0"
+        };
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Get Room ID
+        // Get Room ID & Name
         const params = new URLSearchParams(window.location.search);
         const roomId = params.get('room');
+        const userName = params.get('name') || localStorage.getItem('heartSyncName') || 'Kamu';
 
         if (!roomId) {
-            alert('No room ID found!');
+            alert('Kode ruangan tidak ditemukan!');
             window.location.href = 'index.html';
         }
 
@@ -294,9 +380,16 @@ const firebaseConfig = {
         const instruction = document.getElementById('instruction');
         const orb1 = document.getElementById('orb1');
         const orb2 = document.getElementById('orb2');
+        const orb1Label = document.getElementById('orb1Label');
+        const orb2Label = document.getElementById('orb2Label');
         const mergedHeart = document.getElementById('mergedHeart');
+        const mergedNames = document.getElementById('mergedNames');
+        const name1Display = document.getElementById('name1Display');
+        const name2Display = document.getElementById('name2Display');
         const successOverlay = document.getElementById('successOverlay');
+        const successNames = document.getElementById('successNames');
         const openMessageBtn = document.getElementById('openMessageBtn');
+        const glowBurst = document.getElementById('glowBurst');
 
         // State
         let userId = Math.random().toString(36).substr(2, 9);
@@ -304,6 +397,8 @@ const firebaseConfig = {
         let syncStartTime = null;
         let syncInterval = null;
         let animationTriggered = false;
+        let partnerName = 'Pasangan';
+        let allNames = [];
 
         const SYNC_DURATION = 3000; // 3 seconds
         const circumference = 2 * Math.PI * 90;
@@ -316,7 +411,17 @@ const firebaseConfig = {
         // Initialize user state
         set(userStateRef, {
             holding: false,
+            name: userName,
             timestamp: Date.now()
+        });
+
+        // Also read room users to get names
+        const usersRef = ref(database, `rooms/${roomId}/users`);
+        onValue(usersRef, (snapshot) => {
+            const users = snapshot.val();
+            if (!users) return;
+            const names = Object.values(users).map(u => u.name).filter(Boolean);
+            if (names.length > 0) allNames = names;
         });
 
         // Listen to sync state
@@ -327,9 +432,19 @@ const firebaseConfig = {
             const users = Object.keys(data);
             const holdingUsers = users.filter(uid => data[uid].holding);
 
+            // Collect names from sync data
+            const syncNames = users.map(uid => data[uid].name).filter(Boolean);
+            if (syncNames.length > 0) allNames = [...new Set([...allNames, ...syncNames])];
+
+            // Find partner name
+            const partnerId = users.find(uid => uid !== userId);
+            if (partnerId && data[partnerId]?.name) {
+                partnerName = data[partnerId].name;
+            }
+
             // Update status
             if (users.length >= 2) {
-                statusText.textContent = 'Both hearts connected!';
+                statusText.textContent = 'Kedua hati terhubung!';
             }
 
             // Update individual status
@@ -337,8 +452,8 @@ const firebaseConfig = {
             const partnerIds = users.filter(uid => uid !== userId);
             const isUser2Holding = partnerIds.some(uid => data[uid]?.holding);
 
-            user1Status.textContent = `You: ${isUser1Holding ? '💕 Ready' : 'Not Ready'}`;
-            user2Status.textContent = `Partner: ${isUser2Holding ? '💕 Ready' : 'Not Ready'}`;
+            user1Status.textContent = `Kamu: ${isUser1Holding ? '💕 Siap' : 'Belum Siap'}`;
+            user2Status.textContent = `${partnerName}: ${isUser2Holding ? '💕 Siap' : 'Belum Siap'}`;
 
             // Check if both holding
             if (holdingUsers.length === 2 && !animationTriggered) {
@@ -440,6 +555,10 @@ const firebaseConfig = {
                 navigator.vibrate([200, 100, 200]);
             }
 
+            // Set orb labels
+            orb1Label.textContent = userName;
+            orb2Label.textContent = partnerName;
+
             // Hide instruction
             gsap.to(instruction, {
                 opacity: 0,
@@ -447,11 +566,17 @@ const firebaseConfig = {
                 duration: 0.5
             });
 
-            // Show orbs
+            // Show orbs with labels
             gsap.to([orb1, orb2], {
                 opacity: 1,
                 duration: 0.5,
                 onComplete: () => {
+                    // Show orb labels 
+                    gsap.to([orb1Label, orb2Label], {
+                        opacity: 1,
+                        duration: 0.3
+                    });
+
                     // Animate orbs to center
                     gsap.to(orb1, {
                         left: '50%',
@@ -466,11 +591,28 @@ const firebaseConfig = {
                         ease: 'power2.inOut',
                         x: '50%',
                         onComplete: () => {
-                            // Hide orbs
+                            // Hide orbs + labels
                             gsap.to([orb1, orb2], {
                                 opacity: 0,
                                 scale: 0,
                                 duration: 0.3
+                            });
+
+                            // Glow burst effect
+                            gsap.to(glowBurst, {
+                                opacity: 0.8,
+                                width: '400px',
+                                height: '400px',
+                                duration: 0.4,
+                                ease: 'power2.out',
+                                onComplete: () => {
+                                    gsap.to(glowBurst, {
+                                        opacity: 0,
+                                        width: '600px',
+                                        height: '600px',
+                                        duration: 0.8
+                                    });
+                                }
                             });
 
                             // Show merged heart
@@ -483,13 +625,25 @@ const firebaseConfig = {
                                     // Heartbeat
                                     mergedHeart.style.animation = 'heartbeat 1s ease-in-out 3';
                                     
+                                    // Show names below heart
+                                    name1Display.textContent = userName;
+                                    name2Display.textContent = partnerName;
+                                    gsap.to(mergedNames, {
+                                        opacity: 1,
+                                        y: -10,
+                                        duration: 0.8,
+                                        delay: 0.3,
+                                        ease: 'power2.out'
+                                    });
+
                                     // Create particles
                                     createParticleBurst();
+                                    createSparkles();
 
                                     // Show success after heartbeat
                                     setTimeout(() => {
                                         showSuccess();
-                                    }, 3000);
+                                    }, 3500);
                                 }
                             });
                         }
@@ -504,14 +658,17 @@ const firebaseConfig = {
             const centerX = window.innerWidth / 2;
             const centerY = window.innerHeight / 2;
 
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 60; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = centerX + 'px';
                 particle.style.top = centerY + 'px';
+                particle.style.background = i % 2 === 0 ? '#ff006e' : '#8338ec';
+                particle.style.width = (Math.random() * 6 + 2) + 'px';
+                particle.style.height = particle.style.width;
                 
-                const angle = (Math.PI * 2 * i) / 50;
-                const velocity = 100 + Math.random() * 100;
+                const angle = (Math.PI * 2 * i) / 60;
+                const velocity = 80 + Math.random() * 150;
                 const tx = Math.cos(angle) * velocity;
                 const ty = Math.sin(angle) * velocity;
 
@@ -526,7 +683,7 @@ const firebaseConfig = {
                     onComplete: () => {
                         gsap.to(particle, {
                             opacity: 0,
-                            duration: 0.5,
+                            duration: 0.8,
                             onComplete: () => particle.remove()
                         });
                     }
@@ -534,8 +691,46 @@ const firebaseConfig = {
             }
         }
 
+        // Sparkle effect
+        function createSparkles() {
+            const container = document.getElementById('particleContainer');
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const sparkleChars = ['✦', '✧', '⭐', '💫', '✨'];
+
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    sparkle.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+                    sparkle.style.left = (centerX + (Math.random() - 0.5) * 200) + 'px';
+                    sparkle.style.top = (centerY + (Math.random() - 0.5) * 200) + 'px';
+                    sparkle.style.fontSize = (Math.random() * 20 + 12) + 'px';
+
+                    container.appendChild(sparkle);
+
+                    gsap.to(sparkle, {
+                        opacity: 1,
+                        y: -(Math.random() * 60 + 30),
+                        scale: 1.5,
+                        duration: 0.6,
+                        ease: 'power2.out',
+                        onComplete: () => {
+                            gsap.to(sparkle, {
+                                opacity: 0,
+                                y: '-=20',
+                                duration: 0.5,
+                                onComplete: () => sparkle.remove()
+                            });
+                        }
+                    });
+                }, i * 100);
+            }
+        }
+
         // Show Success
         function showSuccess() {
+            successNames.textContent = `${userName} & ${partnerName}`;
             successOverlay.style.display = 'flex';
             gsap.fromTo(successOverlay, 
                 { opacity: 0 },
@@ -549,7 +744,7 @@ const firebaseConfig = {
         // Confetti
         function createConfetti() {
             const container = successOverlay;
-            const colors = ['#ff006e', '#8338ec', '#3a86ff', '#00ff88'];
+            const colors = ['#ff006e', '#8338ec', '#3a86ff', '#00ff88', '#ffbe0b'];
 
             for (let i = 0; i < 100; i++) {
                 setTimeout(() => {
@@ -560,13 +755,14 @@ const firebaseConfig = {
                     confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
                     confetti.style.width = Math.random() * 10 + 5 + 'px';
                     confetti.style.height = confetti.style.width;
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
                     
                     container.appendChild(confetti);
 
                     gsap.to(confetti, {
                         y: window.innerHeight + 100,
                         x: (Math.random() - 0.5) * 200,
-                        rotation: Math.random() * 360,
+                        rotation: Math.random() * 720,
                         opacity: 1,
                         duration: 3 + Math.random() * 2,
                         ease: 'power1.out',
@@ -578,7 +774,7 @@ const firebaseConfig = {
 
         // Open Message
         openMessageBtn.addEventListener('click', () => {
-            window.location.href = `message.html?room=${roomId}`;
+            window.location.href = `message.html?room=${roomId}&name=${encodeURIComponent(userName)}&partner=${encodeURIComponent(partnerName)}`;
         });
     </script>
 
