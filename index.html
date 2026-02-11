@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>Heart Sync - Valentine's Day Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1f 50%, #2a0a2a 100%);
+            min-height: 100vh;
+        }
+
+        .romantic-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Particle Canvas */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Glowing Heart Animation */
+        .heart-glow {
+            animation: heartbeat 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 0, 110, 0.8));
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(255, 0, 110, 0.1);
+        }
+
+        /* Neon Glow Button */
+        .neon-button {
+            position: relative;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .neon-button:hover {
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* Pulse Animation */
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Connection Status */
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff006e;
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.8);
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Room ID Display */
+        .room-id-box {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 4px;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 110, 0.5));
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Heart SVG */
+        .heart-svg {
+            fill: url(#heartGradient);
+            filter: drop-shadow(0 0 20px rgba(255, 0, 110, 0.6));
+        }
+
+        /* Copy Button Effect */
+        .copy-btn {
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .copied {
+            background: linear-gradient(135deg, #00ff88, #00d4ff) !important;
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Particle Background -->
+    <canvas id="particles"></canvas>
+
+    <!-- Main Content -->
+    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full fade-in">
+            
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="romantic-title text-5xl md:text-7xl font-bold text-white mb-4">
+                    Heart Sync
+                </h1>
+                <p class="text-pink-300 text-lg md:text-xl">
+                    A Valentine's Experience for Two Hearts
+                </p>
+            </div>
+
+            <!-- Glowing Heart -->
+            <div class="flex justify-center mb-12 heart-glow">
+                <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff006e;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#8338ec;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path class="heart-svg" d="M50,90 C50,90 10,65 10,40 C10,25 20,15 30,15 C40,15 50,25 50,25 C50,25 60,15 70,15 C80,15 90,25 90,40 C90,65 50,90 50,90 Z"/>
+                </svg>
+            </div>
+
+            <!-- Connection Card -->
+            <div class="glass rounded-3xl p-8 md:p-12 mb-8">
+                
+                <!-- Status -->
+                <div id="statusSection" class="text-center mb-8">
+                    <div class="flex items-center justify-center gap-3 mb-4">
+                        <div class="status-indicator"></div>
+                        <p id="statusText" class="text-white text-lg">
+                            Initializing connection...
+                        </p>
+                    </div>
+                    <p id="connectionCount" class="text-pink-400 text-sm">
+                        0/2 hearts connected
+                    </p>
+                </div>
+
+                <!-- Room ID Display -->
+                <div id="roomSection" class="text-center mb-8 hidden">
+                    <p class="text-gray-400 mb-4 text-sm uppercase tracking-wider">
+                        Your Room Code
+                    </p>
+                    <div class="room-id-box mb-6" id="roomIdDisplay">
+                        ------
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6">
+                        Share this link with your Valentine
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div id="actionButtons" class="space-y-4">
+                    <!-- Copy Link Button -->
+                    <button id="copyLinkBtn" class="neon-button copy-btn w-full py-4 px-6 rounded-full text-white font-semibold text-lg transition-all duration-300 hidden">
+                        <span id="copyBtnText">📋 Copy Link</span>
+                    </button>
+
+                    <!-- Start Button -->
+                    <button id="startBtn" class="neon-button w-full py-4 px-6 rounded-full text-white font-semibold text-lg">
+                        💕 Create Connection
+                    </button>
+                </div>
+
+                <!-- Waiting Message -->
+                <div id="waitingMessage" class="hidden text-center mt-8">
+                    <div class="pulse">
+                        <p class="text-pink-300 text-lg mb-2">
+                            💫 Waiting for your soulmate...
+                        </p>
+                        <p class="text-gray-500 text-sm">
+                            They will feel your heart when they connect
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Both Connected -->
+                <div id="connectedMessage" class="hidden text-center mt-8">
+                    <div class="mb-6">
+                        <p class="text-green-400 text-xl mb-2">
+                            ✨ Both hearts connected!
+                        </p>
+                        <p class="text-gray-400 text-sm">
+                            Ready to sync your hearts
+                        </p>
+                    </div>
+                    <button id="continueBtn" class="neon-button w-full py-4 px-6 rounded-full text-white font-semibold text-lg">
+                        Continue to Experience →
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center text-gray-500 text-sm">
+                <p>Made with 💕 for Valentine's Day 2026</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, set, onValue, push, onDisconnect, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCBJI5DwaPfLlLBCWHyUWjpEYJTd2EGvJg",
+  authDomain: "heart-sync-valentine.firebaseapp.com",
+  databaseURL: "https://heart-sync-valentine-default-rtdb.firebaseio.com",
+  projectId: "heart-sync-valentine",
+  storageBucket: "heart-sync-valentine.firebasestorage.app",
+  messagingSenderId: "648055518881",
+  appId: "1:648055518881:web:4d6c99ad54f20ca518e2e0"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Elements
+        const statusText = document.getElementById('statusText');
+        const connectionCount = document.getElementById('connectionCount');
+        const roomSection = document.getElementById('roomSection');
+        const roomIdDisplay = document.getElementById('roomIdDisplay');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const copyBtnText = document.getElementById('copyBtnText');
+        const startBtn = document.getElementById('startBtn');
+        const waitingMessage = document.getElementById('waitingMessage');
+        const connectedMessage = document.getElementById('connectedMessage');
+        const continueBtn = document.getElementById('continueBtn');
+
+        let roomId = null;
+        let userRef = null;
+
+        // Generate Room ID
+        function generateRoomId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let id = '';
+            for (let i = 0; i < 6; i++) {
+                id += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return id;
+        }
+
+        // Get Room ID from URL or generate new
+        function getRoomId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('room') || null;
+        }
+
+        // Initialize Connection
+        function initializeConnection() {
+            roomId = getRoomId();
+            
+            if (!roomId) {
+                // Creator mode - generate new room
+                statusText.textContent = 'Creating your connection...';
+            } else {
+                // Joiner mode
+                statusText.textContent = 'Joining your Valentine...';
+                joinRoom(roomId);
+            }
+        }
+
+        // Create Room
+        startBtn.addEventListener('click', () => {
+            roomId = generateRoomId();
+            const roomRef = ref(database, `rooms/${roomId}`);
+            
+            // Create room
+            set(roomRef, {
+                created: serverTimestamp(),
+                state: 'waiting'
+            });
+
+            // Add user to room
+            joinRoom(roomId);
+
+            // Update URL
+            const newUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+            window.history.pushState({}, '', newUrl);
+
+            // Show room info
+            roomIdDisplay.textContent = roomId;
+            roomSection.classList.remove('hidden');
+            copyLinkBtn.classList.remove('hidden');
+            startBtn.classList.add('hidden');
+            waitingMessage.classList.remove('hidden');
+            statusText.textContent = 'Connection created!';
+        });
+
+        // Join Room
+        function joinRoom(room) {
+            const usersRef = ref(database, `rooms/${room}/users`);
+            userRef = push(usersRef);
+            
+            // Set user presence
+            set(userRef, {
+                connected: true,
+                timestamp: serverTimestamp()
+            });
+
+            // Remove on disconnect
+            onDisconnect(userRef).remove();
+
+            // Listen for connection changes
+            onValue(usersRef, (snapshot) => {
+                const users = snapshot.val();
+                const count = users ? Object.keys(users).length : 0;
+                
+                connectionCount.textContent = `${count}/2 hearts connected`;
+
+                if (count === 1) {
+                    statusText.textContent = 'Waiting for your soulmate...';
+                    if (roomId) {
+                        roomIdDisplay.textContent = roomId;
+                        roomSection.classList.remove('hidden');
+                        copyLinkBtn.classList.remove('hidden');
+                        startBtn.classList.add('hidden');
+                        waitingMessage.classList.remove('hidden');
+                    }
+                } else if (count === 2) {
+                    statusText.textContent = 'Both hearts connected! 💕';
+                    waitingMessage.classList.add('hidden');
+                    connectedMessage.classList.remove('hidden');
+                }
+            });
+        }
+
+        // Copy Link
+        copyLinkBtn.addEventListener('click', () => {
+            const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+            navigator.clipboard.writeText(link).then(() => {
+                copyBtnText.textContent = '✓ Link Copied!';
+                copyLinkBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtnText.textContent = '📋 Copy Link';
+                    copyLinkBtn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        // Continue to Sync Page
+        continueBtn.addEventListener('click', () => {
+            window.location.href = `sync.html?room=${roomId}`;
+        });
+
+        // Initialize on load
+        initializeConnection();
+    </script>
+
+    <!-- Particle Animation -->
+    <script>
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Particle class
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                
+                // Heart or circle
+                this.isHeart = Math.random() > 0.7;
+                this.color = Math.random() > 0.5 ? '#ff006e' : '#8338ec';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                
+                if (this.isHeart) {
+                    // Draw heart
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    const x = this.x;
+                    const y = this.y;
+                    const size = this.size;
+                    
+                    ctx.moveTo(x, y + size);
+                    ctx.bezierCurveTo(x, y + size - 2, x - size, y - size, x, y - size - 1);
+                    ctx.bezierCurveTo(x + size, y - size, x, y + size - 2, x, y + size);
+                    ctx.fill();
+                } else {
+                    // Draw circle
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+        }
+
+        // Create particles
+        const particles = [];
+        for (let i = 0; i < 80; i++) {
+            particles.push(new Particle());
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

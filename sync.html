@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Sync - Touch Together</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1f 50%, #2a0a2a 100%);
+            height: 100vh;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .romantic-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Touch Screen */
+        #touchScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* Orbs */
+        .orb {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            filter: blur(2px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .orb-user1 {
+            background: radial-gradient(circle, #ff006e, #ff006e00);
+            box-shadow: 0 0 60px rgba(255, 0, 110, 0.8);
+            left: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .orb-user2 {
+            background: radial-gradient(circle, #8338ec, #8338ec00);
+            box-shadow: 0 0 60px rgba(131, 56, 236, 0.8);
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Merged Heart */
+        .merged-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            pointer-events: none;
+            filter: drop-shadow(0 0 40px rgba(255, 0, 110, 0.8));
+        }
+
+        /* Progress Ring */
+        .progress-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.1s linear;
+            stroke: url(#progressGradient);
+            stroke-width: 8;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ff006e;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Pulse animation */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        .pulse-active {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* Heartbeat */
+        @keyframes heartbeat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            25% { transform: translate(-50%, -50%) scale(1.1); }
+            50% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Success overlay */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff006e;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Touch Screen -->
+    <div id="touchScreen"></div>
+
+    <!-- Top Status Bar -->
+    <div class="fixed top-0 left-0 right-0 z-50 p-4">
+        <div class="max-w-md mx-auto">
+            <div class="status-badge rounded-2xl p-4 text-center">
+                <p class="text-white text-sm mb-2" id="statusText">Connecting...</p>
+                <div class="flex justify-center gap-4 text-xs">
+                    <span class="text-pink-400" id="user1Status">You: Not Ready</span>
+                    <span class="text-purple-400" id="user2Status">Partner: Not Ready</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Instruction -->
+    <div id="instruction" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 text-center">
+        <div class="mb-8">
+            <div class="progress-container mx-auto mb-6">
+                <svg class="progress-ring" width="200" height="200">
+                    <defs>
+                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff006e;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#8338ec;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="progress-ring-circle" stroke="#333" stroke-width="8" fill="none" r="90" cx="100" cy="100" />
+                    <circle id="progressCircle" class="progress-ring-circle" r="90" cx="100" cy="100" 
+                            stroke-dasharray="565.48" stroke-dashoffset="565.48" />
+                </svg>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <p class="text-6xl mb-2" id="countdownText">3</p>
+                    <p class="text-white text-sm" id="progressText">0%</p>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="romantic-title text-4xl md:text-5xl text-white mb-4">
+            Touch & Hold
+        </h2>
+        <p class="text-pink-300 text-lg mb-2">
+            Press the screen together
+        </p>
+        <p class="text-gray-500 text-sm">
+            Hold for 3 seconds to sync your hearts
+        </p>
+    </div>
+
+    <!-- Orbs -->
+    <div id="orb1" class="orb orb-user1"></div>
+    <div id="orb2" class="orb orb-user2"></div>
+
+    <!-- Merged Heart -->
+    <div id="mergedHeart" class="merged-heart">
+        <svg width="200" height="200" viewBox="0 0 100 100">
+            <defs>
+                <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff006e;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8338ec;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#heartGradient)" d="M50,90 C50,90 10,65 10,40 C10,25 20,15 30,15 C40,15 50,25 50,25 C50,25 60,15 70,15 C80,15 90,25 90,40 C90,65 50,90 50,90 Z"/>
+        </svg>
+    </div>
+
+    <!-- Success Overlay -->
+    <div id="successOverlay" class="success-overlay">
+        <div class="text-center px-4">
+            <div class="mb-8">
+                <svg width="150" height="150" viewBox="0 0 100 100" class="mx-auto">
+                    <defs>
+                        <linearGradient id="successGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff006e;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#8338ec;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#successGradient)" d="M50,90 C50,90 10,65 10,40 C10,25 20,15 30,15 C40,15 50,25 50,25 C50,25 60,15 70,15 C80,15 90,25 90,40 C90,65 50,90 50,90 Z"/>
+                </svg>
+            </div>
+            <h1 class="romantic-title text-5xl md:text-6xl text-white mb-6">
+                Connection Established
+            </h1>
+            <p class="text-pink-300 text-2xl mb-12">
+                Forever 💕
+            </p>
+            <button id="openMessageBtn" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-semibold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                Open Our Message
+            </button>
+        </div>
+    </div>
+
+    <!-- Particle Container -->
+    <div id="particleContainer"></div>
+
+    <!-- Firebase & Logic -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, set, onValue, update } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCBJI5DwaPfLlLBCWHyUWjpEYJTd2EGvJg",
+  authDomain: "heart-sync-valentine.firebaseapp.com",
+  databaseURL: "https://heart-sync-valentine-default-rtdb.firebaseio.com",
+  projectId: "heart-sync-valentine",
+  storageBucket: "heart-sync-valentine.firebasestorage.app",
+  messagingSenderId: "648055518881",
+  appId: "1:648055518881:web:4d6c99ad54f20ca518e2e0"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Get Room ID
+        const params = new URLSearchParams(window.location.search);
+        const roomId = params.get('room');
+
+        if (!roomId) {
+            alert('No room ID found!');
+            window.location.href = 'index.html';
+        }
+
+        // Elements
+        const touchScreen = document.getElementById('touchScreen');
+        const statusText = document.getElementById('statusText');
+        const user1Status = document.getElementById('user1Status');
+        const user2Status = document.getElementById('user2Status');
+        const progressCircle = document.getElementById('progressCircle');
+        const countdownText = document.getElementById('countdownText');
+        const progressText = document.getElementById('progressText');
+        const instruction = document.getElementById('instruction');
+        const orb1 = document.getElementById('orb1');
+        const orb2 = document.getElementById('orb2');
+        const mergedHeart = document.getElementById('mergedHeart');
+        const successOverlay = document.getElementById('successOverlay');
+        const openMessageBtn = document.getElementById('openMessageBtn');
+
+        // State
+        let userId = Math.random().toString(36).substr(2, 9);
+        let isHolding = false;
+        let syncStartTime = null;
+        let syncInterval = null;
+        let animationTriggered = false;
+
+        const SYNC_DURATION = 3000; // 3 seconds
+        const circumference = 2 * Math.PI * 90;
+        progressCircle.style.strokeDasharray = circumference;
+
+        // Database refs
+        const syncRef = ref(database, `rooms/${roomId}/sync`);
+        const userStateRef = ref(database, `rooms/${roomId}/sync/${userId}`);
+
+        // Initialize user state
+        set(userStateRef, {
+            holding: false,
+            timestamp: Date.now()
+        });
+
+        // Listen to sync state
+        onValue(syncRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            const users = Object.keys(data);
+            const holdingUsers = users.filter(uid => data[uid].holding);
+
+            // Update status
+            if (users.length >= 2) {
+                statusText.textContent = 'Both hearts connected!';
+            }
+
+            // Update individual status
+            const isUser1Holding = data[userId]?.holding || false;
+            const partnerIds = users.filter(uid => uid !== userId);
+            const isUser2Holding = partnerIds.some(uid => data[uid]?.holding);
+
+            user1Status.textContent = `You: ${isUser1Holding ? '💕 Ready' : 'Not Ready'}`;
+            user2Status.textContent = `Partner: ${isUser2Holding ? '💕 Ready' : 'Not Ready'}`;
+
+            // Check if both holding
+            if (holdingUsers.length === 2 && !animationTriggered) {
+                if (!syncStartTime) {
+                    syncStartTime = Date.now();
+                    startSyncAnimation();
+                }
+            } else {
+                if (syncStartTime && !animationTriggered) {
+                    // Reset if one releases
+                    resetSync();
+                }
+            }
+        });
+
+        // Touch handlers
+        let touchStarted = false;
+
+        touchScreen.addEventListener('mousedown', handleTouchStart);
+        touchScreen.addEventListener('touchstart', handleTouchStart);
+        touchScreen.addEventListener('mouseup', handleTouchEnd);
+        touchScreen.addEventListener('touchend', handleTouchEnd);
+        touchScreen.addEventListener('mouseleave', handleTouchEnd);
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            if (animationTriggered) return;
+            
+            touchStarted = true;
+            isHolding = true;
+            update(userStateRef, {
+                holding: true,
+                timestamp: Date.now()
+            });
+
+            // Visual feedback
+            instruction.classList.add('pulse-active');
+            
+            // Vibrate
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchStarted) return;
+            touchStarted = false;
+            isHolding = false;
+            
+            update(userStateRef, {
+                holding: false,
+                timestamp: Date.now()
+            });
+
+            instruction.classList.remove('pulse-active');
+        }
+
+        // Sync Animation
+        function startSyncAnimation() {
+            let elapsed = 0;
+
+            syncInterval = setInterval(() => {
+                elapsed = Date.now() - syncStartTime;
+                const progress = Math.min(elapsed / SYNC_DURATION, 1);
+                
+                // Update progress ring
+                const offset = circumference - (progress * circumference);
+                progressCircle.style.strokeDashoffset = offset;
+                
+                // Update countdown
+                const remaining = Math.ceil((SYNC_DURATION - elapsed) / 1000);
+                countdownText.textContent = remaining;
+                progressText.textContent = `${Math.floor(progress * 100)}%`;
+
+                if (progress >= 1) {
+                    clearInterval(syncInterval);
+                    triggerHeartMerge();
+                }
+            }, 50);
+        }
+
+        function resetSync() {
+            syncStartTime = null;
+            if (syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+            }
+            progressCircle.style.strokeDashoffset = circumference;
+            countdownText.textContent = '3';
+            progressText.textContent = '0%';
+        }
+
+        // Heart Merge Animation
+        function triggerHeartMerge() {
+            animationTriggered = true;
+            
+            // Vibrate success
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]);
+            }
+
+            // Hide instruction
+            gsap.to(instruction, {
+                opacity: 0,
+                scale: 0.8,
+                duration: 0.5
+            });
+
+            // Show orbs
+            gsap.to([orb1, orb2], {
+                opacity: 1,
+                duration: 0.5,
+                onComplete: () => {
+                    // Animate orbs to center
+                    gsap.to(orb1, {
+                        left: '50%',
+                        duration: 2,
+                        ease: 'power2.inOut',
+                        x: '-50%'
+                    });
+
+                    gsap.to(orb2, {
+                        right: '50%',
+                        duration: 2,
+                        ease: 'power2.inOut',
+                        x: '50%',
+                        onComplete: () => {
+                            // Hide orbs
+                            gsap.to([orb1, orb2], {
+                                opacity: 0,
+                                scale: 0,
+                                duration: 0.3
+                            });
+
+                            // Show merged heart
+                            gsap.to(mergedHeart, {
+                                opacity: 1,
+                                scale: 1,
+                                duration: 0.5,
+                                ease: 'back.out',
+                                onComplete: () => {
+                                    // Heartbeat
+                                    mergedHeart.style.animation = 'heartbeat 1s ease-in-out 3';
+                                    
+                                    // Create particles
+                                    createParticleBurst();
+
+                                    // Show success after heartbeat
+                                    setTimeout(() => {
+                                        showSuccess();
+                                    }, 3000);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Particle Burst
+        function createParticleBurst() {
+            const container = document.getElementById('particleContainer');
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                
+                const angle = (Math.PI * 2 * i) / 50;
+                const velocity = 100 + Math.random() * 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+
+                container.appendChild(particle);
+
+                gsap.to(particle, {
+                    x: tx,
+                    y: ty,
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: 'power2.out',
+                    onComplete: () => {
+                        gsap.to(particle, {
+                            opacity: 0,
+                            duration: 0.5,
+                            onComplete: () => particle.remove()
+                        });
+                    }
+                });
+            }
+        }
+
+        // Show Success
+        function showSuccess() {
+            successOverlay.style.display = 'flex';
+            gsap.fromTo(successOverlay, 
+                { opacity: 0 },
+                { opacity: 1, duration: 0.5 }
+            );
+
+            // Create confetti
+            createConfetti();
+        }
+
+        // Confetti
+        function createConfetti() {
+            const container = successOverlay;
+            const colors = ['#ff006e', '#8338ec', '#3a86ff', '#00ff88'];
+
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = Math.random() * 10 + 5 + 'px';
+                    confetti.style.height = confetti.style.width;
+                    
+                    container.appendChild(confetti);
+
+                    gsap.to(confetti, {
+                        y: window.innerHeight + 100,
+                        x: (Math.random() - 0.5) * 200,
+                        rotation: Math.random() * 360,
+                        opacity: 1,
+                        duration: 3 + Math.random() * 2,
+                        ease: 'power1.out',
+                        onComplete: () => confetti.remove()
+                    });
+                }, i * 30);
+            }
+        }
+
+        // Open Message
+        openMessageBtn.addEventListener('click', () => {
+            window.location.href = `message.html?room=${roomId}`;
+        });
+    </script>
+
+</body>
+</html>

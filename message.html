@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Valentine's Message</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1f 50%, #2a0a2a 100%);
+            min-height: 100vh;
+        }
+
+        .romantic-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .handwritten {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* Letter Envelope */
+        .envelope {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .envelope-flap {
+            transition: transform 1s ease;
+            transform-origin: top;
+        }
+
+        .envelope-opened .envelope-flap {
+            transform: rotateX(180deg);
+        }
+
+        /* Message Card */
+        .message-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 240, 245, 0.95));
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255, 0, 110, 0.3);
+        }
+
+        /* Floating Hearts */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-30px) rotate(10deg);
+                opacity: 1;
+            }
+        }
+
+        .floating-heart {
+            position: fixed;
+            animation: float 4s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Seal */
+        .wax-seal {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff006e, #d90058);
+            border-radius: 50%;
+            box-shadow: 0 5px 20px rgba(255, 0, 110, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Ribbon */
+        .ribbon {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            padding: 8px 24px;
+            position: relative;
+            display: inline-block;
+            color: white;
+        }
+
+        .ribbon::before,
+        .ribbon::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .ribbon::before {
+            left: -20px;
+            border-width: 20px 20px 20px 0;
+            border-color: transparent #ff006e transparent transparent;
+        }
+
+        .ribbon::after {
+            right: -20px;
+            border-width: 20px 0 20px 20px;
+            border-color: transparent transparent transparent #8338ec;
+        }
+
+        /* Glitter Effect */
+        .glitter {
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.8) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: glitter 3s linear infinite;
+        }
+
+        @keyframes glitter {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Photo Frame */
+        .photo-frame {
+            border: 10px solid white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .photo-frame::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            z-index: -1;
+            border-radius: 10px;
+        }
+
+        /* Download Button Effect */
+        .download-btn {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Fade In Animation */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Floating Hearts Background -->
+    <div id="floatingHearts"></div>
+
+    <!-- Main Content -->
+    <div class="min-h-screen flex items-center justify-center p-4 py-12">
+        <div class="max-w-4xl w-full">
+
+            <!-- Header -->
+            <div class="text-center mb-12 fade-in">
+                <h1 class="romantic-title text-5xl md:text-7xl text-white mb-4">
+                    Our Love Letter
+                </h1>
+                <p class="text-pink-300 text-lg">
+                    For Valentine's Day 2026
+                </p>
+            </div>
+
+            <!-- Envelope Animation (Hidden after opening) -->
+            <div id="envelopeContainer" class="mb-12 cursor-pointer">
+                <div class="text-center mb-8">
+                    <div class="wax-seal mx-auto glitter">
+                        <svg width="40" height="40" viewBox="0 0 100 100">
+                            <path fill="white" d="M50,90 C50,90 10,65 10,40 C10,25 20,15 30,15 C40,15 50,25 50,25 C50,25 60,15 70,15 C80,15 90,25 90,40 C90,65 50,90 50,90 Z"/>
+                        </svg>
+                    </div>
+                    <p class="text-white mt-4 text-lg">Click to open</p>
+                </div>
+            </div>
+
+            <!-- Message Card (Hidden initially) -->
+            <div id="messageCard" class="hidden">
+                
+                <div class="message-card p-8 md:p-12 fade-in">
+                    
+                    <!-- Ribbon Header -->
+                    <div class="text-center mb-8">
+                        <div class="ribbon inline-block text-xl font-semibold">
+                            ❤️ To My Valentine ❤️
+                        </div>
+                    </div>
+
+                    <!-- Decorative Hearts -->
+                    <div class="text-center mb-8">
+                        <span class="text-6xl">💕</span>
+                    </div>
+
+                    <!-- Message Content -->
+                    <div class="space-y-6 text-gray-800">
+                        
+                        <p class="handwritten text-3xl text-center text-pink-600 mb-8">
+                            My Dearest Love,
+                        </p>
+
+                        <p class="text-lg leading-relaxed">
+                            In this beautiful moment, as our hearts beat in perfect sync, I want you to know that you are the most precious gift life has ever given me. Every day with you feels like Valentine's Day.
+                        </p>
+
+                        <p class="text-lg leading-relaxed">
+                            Your smile lights up my darkest days, your laughter is my favorite melody, and your love is the greatest blessing I could ever ask for. You make everything more beautiful, more meaningful, more magical.
+                        </p>
+
+                        <p class="text-lg leading-relaxed">
+                            Thank you for being my partner, my best friend, and my forever Valentine. Here's to all the adventures we've shared and all the beautiful moments yet to come.
+                        </p>
+
+                        <p class="handwritten text-2xl text-center text-pink-600 mt-8">
+                            I love you more than words can say,
+                        </p>
+
+                        <p class="handwritten text-3xl text-center text-pink-600">
+                            Forever Yours 💕
+                        </p>
+
+                    </div>
+
+                    <!-- Optional Photo Section -->
+                    <div id="photoSection" class="mt-12 hidden">
+                        <div class="photo-frame rounded-lg overflow-hidden">
+                            <img id="couplePhoto" src="" alt="Our Memory" class="w-full h-auto">
+                        </div>
+                        <p class="text-center text-gray-600 mt-4 italic">Our favorite moment together</p>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="text-center mt-12 text-gray-600">
+                        <p class="text-sm">Valentine's Day, February 14, 2026</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+                        
+                        <!-- Download Button -->
+                        <button id="downloadBtn" class="download-btn text-white font-semibold py-4 px-8 rounded-full flex items-center justify-center gap-2 hover:scale-105 transition-transform">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 12L6 8h3V4h2v4h3l-4 4zm-6 5h12v2H4v-2z"/>
+                            </svg>
+                            Download as Image
+                        </button>
+
+                        <!-- Share Button -->
+                        <button id="shareBtn" class="bg-white text-pink-600 border-2 border-pink-600 font-semibold py-4 px-8 rounded-full flex items-center justify-center gap-2 hover:bg-pink-50 transition-all">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M15 8a3 3 0 11-2.977-3 3 3 0 012.977 3zM15.75 13.5a3.001 3.001 0 00-5.5 0H15.75zM5 8a3 3 0 112.977 3A3 3 0 015 8zm.25 5.5a3.001 3.001 0 015.5 0H5.25z"/>
+                            </svg>
+                            Share This Moment
+                        </button>
+
+                    </div>
+
+                    <!-- Customize Message Note -->
+                    <div class="mt-8 text-center">
+                        <p class="text-sm text-gray-500">
+                            💡 To customize this message, edit the text in <code class="bg-gray-200 px-2 py-1 rounded">message.html</code>
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Back Button -->
+                <div class="text-center mt-8">
+                    <button id="backBtn" class="text-pink-400 hover:text-pink-300 underline">
+                        ← Back to Heart Sync
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        // Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyCBJI5DwaPfLlLBCWHyUWjpEYJTd2EGvJg",
+  authDomain: "heart-sync-valentine.firebaseapp.com",
+  databaseURL: "https://heart-sync-valentine-default-rtdb.firebaseio.com",
+  projectId: "heart-sync-valentine",
+  storageBucket: "heart-sync-valentine.firebasestorage.app",
+  messagingSenderId: "648055518881",
+  appId: "1:648055518881:web:4d6c99ad54f20ca518e2e0"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Get Room ID
+        const params = new URLSearchParams(window.location.search);
+        const roomId = params.get('room');
+
+        // Elements
+        const envelopeContainer = document.getElementById('envelopeContainer');
+        const messageCard = document.getElementById('messageCard');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const backBtn = document.getElementById('backBtn');
+
+        // Create Floating Hearts
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            const colors = ['#ff006e', '#8338ec', '#ff4d94', '#a855f7'];
+
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.top = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 4 + 's';
+                heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                heart.textContent = '💕';
+                heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                container.appendChild(heart);
+
+                gsap.to(heart, {
+                    opacity: 0.7,
+                    duration: 1,
+                    delay: Math.random() * 2
+                });
+            }
+        }
+
+        createFloatingHearts();
+
+        // Open Envelope
+        envelopeContainer.addEventListener('click', () => {
+            // Animate envelope out
+            gsap.to(envelopeContainer, {
+                scale: 0,
+                opacity: 0,
+                duration: 0.8,
+                ease: 'back.in',
+                onComplete: () => {
+                    envelopeContainer.style.display = 'none';
+                    messageCard.classList.remove('hidden');
+                    
+                    // Animate message in
+                    gsap.from(messageCard, {
+                        scale: 0.8,
+                        opacity: 0,
+                        duration: 0.8,
+                        ease: 'back.out'
+                    });
+
+                    // Create particle burst
+                    createParticleBurst();
+                }
+            });
+
+            // Vibrate
+            if (navigator.vibrate) {
+                navigator.vibrate(200);
+            }
+        });
+
+        // Particle Burst
+        function createParticleBurst() {
+            const hearts = ['💕', '💖', '💗', '💓', '💝'];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                particle.style.fontSize = '24px';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '9999';
+                particle.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                
+                document.body.appendChild(particle);
+
+                const angle = (Math.PI * 2 * i) / 30;
+                const distance = 100 + Math.random() * 200;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                gsap.to(particle, {
+                    x: tx,
+                    y: ty,
+                    opacity: 0,
+                    rotation: Math.random() * 360,
+                    duration: 1.5,
+                    ease: 'power2.out',
+                    onComplete: () => particle.remove()
+                });
+            }
+        }
+
+        // Download as Image
+        downloadBtn.addEventListener('click', async () => {
+            // Note: For full implementation, you would use html2canvas library
+            alert('Download feature: Use html2canvas library to convert the message to an image.\n\nAdd this script:\n<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>\n\nThen use html2canvas(messageCard) to capture the element.');
+        });
+
+        // Share
+        shareBtn.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Our Valentine\'s Day Message',
+                        text: 'I created a special Heart Sync experience for us! 💕',
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('Share cancelled');
+                }
+            } else {
+                // Fallback: Copy to clipboard
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copied to clipboard! 💕');
+                });
+            }
+        });
+
+        // Back Button
+        backBtn.addEventListener('click', () => {
+            window.location.href = `sync.html?room=${roomId}`;
+        });
+
+        // Optional: Load custom photo
+        // Uncomment and add your photo URL
+        /*
+        const photoSection = document.getElementById('photoSection');
+        const couplePhoto = document.getElementById('couplePhoto');
+        couplePhoto.src = 'YOUR_PHOTO_URL_HERE.jpg';
+        photoSection.classList.remove('hidden');
+        */
+    </script>
+
+</body>
+</html>
