@@ -188,9 +188,53 @@
             margin: 2rem auto;
             max-width: 200px;
         }
+
+        /* Music Button */
+        .music-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(255, 0, 110, 0.4);
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+
+        .music-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 30px rgba(255, 0, 110, 0.6);
+        }
+
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .music-playing {
+            animation: spin-slow 3s linear infinite;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="https://cdn.pixabay.com/audio/2024/11/29/audio_f0c43fbd43.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Toggle Button -->
+    <button id="musicBtn" class="music-btn" title="Musik">
+        🎵
+    </button>
     
     <!-- Floating Hearts Background -->
     <div id="floatingHearts"></div>
@@ -480,12 +524,61 @@
 
         // Optional: Load custom photo
         // Uncomment and add your photo URL
-        /*
+        
         const photoSection = document.getElementById('photoSection');
         const couplePhoto = document.getElementById('couplePhoto');
-        couplePhoto.src = 'YOUR_PHOTO_URL_HERE.jpg';
+        couplePhoto.src = 'ceuneh.jpg';
         photoSection.classList.remove('hidden');
-        */
+        
+    </script>
+
+    <!-- Music Control Script -->
+    <script>
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicBtn');
+        let isMusicPlaying = false;
+
+        bgMusic.volume = 0.3;
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicBtn.textContent = '🎵';
+                musicBtn.classList.remove('music-playing');
+                localStorage.setItem('heartSyncMusic', 'off');
+            } else {
+                bgMusic.play().then(() => {
+                    musicBtn.textContent = '🎶';
+                    musicBtn.classList.add('music-playing');
+                    localStorage.setItem('heartSyncMusic', 'on');
+                }).catch(() => {});
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+
+        musicBtn.addEventListener('click', toggleMusic);
+
+        // Auto-play if was playing before
+        if (localStorage.getItem('heartSyncMusic') === 'on') {
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+                musicBtn.textContent = '🎶';
+                musicBtn.classList.add('music-playing');
+            }).catch(() => {});
+        }
+
+        // Also try to play on first user interaction
+        document.addEventListener('click', function autoPlay() {
+            if (!isMusicPlaying && localStorage.getItem('heartSyncMusic') !== 'off') {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicBtn.textContent = '🎶';
+                    musicBtn.classList.add('music-playing');
+                    localStorage.setItem('heartSyncMusic', 'on');
+                }).catch(() => {});
+            }
+            document.removeEventListener('click', autoPlay);
+        }, { once: true });
     </script>
 
 </body>
