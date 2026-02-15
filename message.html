@@ -383,13 +383,13 @@
         const greeting = document.getElementById('greeting');
         const signOff = document.getElementById('signOff');
 
-        if (partnerName) {
-            ribbonText.textContent = `Untuk ${partnerName}`;
-            greeting.textContent = `Untuk ${partnerName} tersayang,`;
+        if (userName) {
+            ribbonText.textContent = `Untuk ${userName}`;
+            greeting.textContent = `Untuk ${userName} tersayang,`;
         }
 
-        if (userName) {
-            signOff.textContent = `Dengan cinta, ${userName} 💕`;
+        if (partnerName) {
+            signOff.textContent = `Dengan cinta, ${partnerName} 💕`;
         }
 
         // Elements
